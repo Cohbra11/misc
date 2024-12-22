@@ -1,8 +1,21 @@
-// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// ©jdehorty
 
-// @version=5
-strategy('Demo GPT - Machine Learning: Lorentzian Classification', overlay=true, precision=4, max_labels_count=500, commission_type=strategy.commission.percent, commission_value=0.1, slippage=3)
+//@version=5
+
+strategy('Demo GPT - Machine Learning: Lorentzian Classification', 
+         overlay=true, 
+         precision=4, 
+         max_labels_count=500, 
+         commission_type=strategy.commission.percent, 
+         commission_value=0.44, 
+         initial_capital=1000, 
+         default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, 
+         currency=currency.USD, 
+         margin_long=100, 
+         margin_short=100, 
+         calc_on_order_fills=true, 
+         calc_on_every_tick=true, 
+         slippage=3)
 
 // Importing required libraries
 import jdehorty/MLExtensions/2 as ml
@@ -15,11 +28,9 @@ input_end_date = input.time(timestamp("2069-12-31 23:59"), title="End Date")
 // Date filter
 inDateRange = (time >= input_start_date and time <= input_end_date)
 
-
 // ====================
 // ==== Background ====
 // ====================
-
 // When using Machine Learning algorithms like K-Nearest Neighbors, choosing an
 // appropriate distance metric is essential. Euclidean Distance is often used as
 // the default distance metric, but it may not always be the best choice. This is
@@ -464,9 +475,10 @@ bool alertBearish = useKernelSmoothing ? isBearishCrossAlert : isBearishChange
 // Bullish and Bearish Filters based on Kernel
 isBullish = useKernelFilter ? (useKernelSmoothing ? isBullishSmooth : isBullishRate) : true
 isBearish = useKernelFilter ? (useKernelSmoothing ? isBearishSmooth : isBearishRate) : true
-// ===========================
+
+// =========================
 // ==== Entries and Exits ====
-// ===========================
+// =========================
 
 // Entry Conditions: Booleans for ML Model Position Entries
 startLongTrade = isNewBuySignal and isBullish and isEmaUptrend and isSmaUptrend
@@ -492,11 +504,15 @@ endLongTrade = settings.useDynamicExits and isDynamicExitValid ? endLongTradeDyn
 endShortTrade = settings.useDynamicExits and isDynamicExitValid ? endShortTradeDynamic : endShortTradeStrict
 
 // Execute trades only within the date range
-if (inDateRange)
-    if (startLongTrade)
+if (inDateRange) 
+    if (startLongTrade) 
         strategy.entry("Long", strategy.long)
-    if (endLongTrade)
+    if (endLongTrade) 
         strategy.close("Long")
+    if (startShortTrade) 
+        strategy.entry("Short", strategy.short)
+    if (endShortTrade) 
+        strategy.close("Short")
 
 // =========================
 // ==== Plotting Labels ====
@@ -513,18 +529,18 @@ plotshape(endShortTrade and settings.showExits ? low : na, 'StopSell', shape.xcr
 // ================ 
 
 // Separate Alerts for Entries and Exits
-alertcondition(startLongTrade, title='Open Long ▲', message='LDC Open Long ▲ | {{ticker}}@{{close}} | ({{interval}})')
-alertcondition(endLongTrade, title='Close Long ▲', message='LDC Close Long ▲ | {{ticker}}@{{close}} | ({{interval}})')
-alertcondition(startShortTrade, title='Open Short ▼', message='LDC Open Short  | {{ticker}}@{{close}} | ({{interval}})')
-alertcondition(endShortTrade, title='Close Short ▼', message='LDC Close Short ▼ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(startLongTrade, title='Open Long ▲', message='LDC Open Long ▲ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(endLongTrade, title='Close Long ▲', message='LDC Close Long ▲ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(startShortTrade, title='Open Short ▼', message='LDC Open Short  | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(endShortTrade, title='Close Short ▼', message='LDC Close Short ▼ | {{ticker}}@{{close}} | ({{interval}})')
 
 // Combined Alerts for Entries and Exits
-alertcondition(startShortTrade or startLongTrade, title='Open Position ▲▼', message='LDC Open Position ▲▼ | {{ticker}}@{{close}} | ({{interval}})')
-alertcondition(endShortTrade or endLongTrade, title='Close Position ▲▼', message='LDC Close Position  ▲▼ | {{ticker}}@[{{close}}] | ({{interval}})')
+// alertcondition(startShortTrade or startLongTrade, title='Open Position ▲▼', message='LDC Open Position ▲▼ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(endShortTrade or endLongTrade, title='Close Position ▲▼', message='LDC Close Position  ▲▼ | {{ticker}}@[{{close}}] | ({{interval}})')
 
 // Kernel Estimate Alerts
-alertcondition(condition=alertBullish, title='Kernel Bullish Color Change', message='LDC Kernel Bullish ▲ | {{ticker}}@{{close}} | ({{interval}})')
-alertcondition(condition=alertBearish, title='Kernel Bearish Color Change', message='LDC Kernel Bearish ▼ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(condition=alertBullish, title='Kernel Bullish Color Change', message='LDC Kernel Bullish ▲ | {{ticker}}@{{close}} | ({{interval}})')
+// alertcondition(condition=alertBearish, title='Kernel Bearish Color Change', message='LDC Kernel Bearish ▼ | {{ticker}}@{{close}} | ({{interval}})')
 
 // =========================
 // ==== Display Signals ==== 
@@ -554,7 +570,7 @@ plot(backTestStream, "Backtest Stream", display=display.none)
 
 // The following can be used to display real-time trade stats. This can be a useful mechanism for obtaining real-time feedback during Feature Engineering. This does NOT replace the need to properly backtest.
 // Note: In this context, a "Stop-Loss" is defined instances where the ML Signal prematurely flips directions before an exit signal can be generated.
-[totalWins, totalLosses, totalEarlySignalFlips, totalTrades, tradeStatsHeader, winLossRatio, winRate] = ml.backtest(high, low, open, startLongTrade, endLongTrade, startShortTrade, endShortTrade, isEarlySignalFlip, maxBarsBackIndex, bar_index, settings.source, useWorstCase)
+[totalWins, totalLosses, totalEarlySignalFlips, totalTrades, tradeStatsHeader, winLossRatio, winRate] = ml.backtest(high, low, open, startLongTrade, endLongTrade, startShortTrade, endShortTrade, isEarlySignalFlip, maxBarsBackIndex, bar_index, src, useWorstCase)
 
 init_table() =>
     c_transparent = color.new(color.black, 100)
