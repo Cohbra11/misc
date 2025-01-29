@@ -1,0 +1,62 @@
+{
+    "source": "close",
+    "neighbors_count": 8,
+    "max_bars_back": 2000,
+    "feature_count": 3,
+    "color_compression": 1,
+    "show_exits": false,
+    "use_dynamic_exits": false,
+    "enable_short_trades": false,
+    "use_worst_case_estimates": true,
+    "filter_settings": {
+        "use_volatility_filter": true,
+        "use_regime_filter": false,
+        "use_adx_filter": false,
+        "regime_threshold": -0.1,
+        "adx_threshold": 18
+    },
+    "features": {
+        "f1": {
+            "type": "RSI",
+            "paramA": 14,
+            "paramB": 2
+        },
+        "f2": {
+            "type": "WT",
+            "paramA": 4,
+            "paramB": 24
+        },
+        "f3": {
+            "type": "CCI",
+            "paramA": 30,
+            "paramB": 27
+        },
+        "f4": {
+            "type": "ADX",
+            "paramA": 20,
+            "paramB": null
+        },
+        "f5": {
+            "type": "RSI",
+            "paramA": 9,
+            "paramB": 1
+        }
+    },
+    "ema_settings": {
+        "use_ema_filter": true,
+        "ema_period": 28
+    },
+    "sma_settings": {
+        "use_sma_filter": false,
+        "sma_period": 200
+    },
+    "kernel_settings": {
+        "use_kernel_filter": true,
+        "show_kernel_estimate": true,
+        "use_kernel_smoothing": false,
+        "lookback_window": 8,
+        "relative_weighting": 7.5,
+        "regression_level": 19,
+        "lag": 0
+    }
+}
